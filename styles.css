@@ -1,0 +1,341 @@
+body { font-family: Arial, sans-serif; text-align: center; overflow: scroll }
+form { margin: 10px auto; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
+input, select, button { margin: 5px; padding: 5px; text-align: center; }
+
+/* Edit Component Container */
+.edit-component-container {
+    margin: 20px auto;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    max-width: 700px;
+    background-color: #f9f9f9; /* Warna latar belakang */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Efek bayangan */
+    text-align: left;
+}
+
+/* Judul */
+.edit-component-container h4 {
+    margin-bottom: 15px;
+    font-size: 18px;
+    text-align: center;
+    color: #333;
+}
+
+/* Form Group */
+.form-group {
+    margin-bottom: 15px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+}
+
+.form-group label {
+    flex: 1;
+    font-weight: bold;
+    color: #333;
+}
+
+.form-group input,
+.form-group select {
+    flex: 2;
+    padding: 8px;
+    font-size: 14px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    width: 100%;
+}
+
+/* Tombol Regenerate */
+.form-actions {
+    text-align: center;
+}
+
+.form-actions button {
+    padding: 10px 20px;
+    font-size: 14px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.form-actions button:hover {
+    background-color: #0056b3;
+}
+
+
+#icon-table-container {
+    flex: 1; /* Lebar lebih kecil untuk tabel */
+    text-align: center;
+    border-left: 1px solid #ddd;
+    padding-left: 20px;
+}
+
+/*#icon-list {*/
+/*    display: flex;*/
+/*    flex-wrap: wrap;*/
+/*    justify-content: center;*/
+/*    gap: 20px;*/
+/*    max-height: 300px; !* Tinggi maksimal area ikon *!*/
+/*    max-width: 800px; !* Lebar maksimal area ikon *!*/
+/*    overflow-y: auto; !* Scroll secara vertikal *!*/
+/*    overflow-x: auto; !* Scroll secara horizontal *!*/
+/*    border: 1px solid #ddd; !* Opsional: Tambahkan border *!*/
+/*    padding: 10px;*/
+/*}*/
+
+.icon-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    text-align: center;
+}
+
+.icon-item img {
+    width: 50px; /* Ukuran ikon default */
+    height: 50px;
+    cursor: grab;
+    transition: transform 0.3s ease;
+}
+.icon-item img:hover {
+    transform: scale(1.5);}
+
+#download-btn {
+    margin-top: 10px;
+    padding: 10px 20px;
+    font-size: 14px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+#download-btn:hover {
+    background-color: #0056b3;
+}
+
+/* Container untuk Diagram dan Icon List */
+div[style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap;"] {
+    align-items: flex-start; /* Pastikan elemen disejajarkan di atas */
+}
+
+
+/* Diagram Container */
+#diagram-container {
+    flex: 2; /* Lebar lebih besar untuk Diagram */
+    text-align: center;
+    padding: 0;
+    border: 1px solid #ccc;
+    margin-bottom: 0; /* Hilangkan jarak bawah */
+    position: relative;
+    background-color: #f9f9f9;
+}
+
+/* Zoom Controls */
+#zoom-controls {
+    display: flex;
+    justify-content: center; /* Pusatkan tombol di bawah Diagram */
+    gap: 10px; /* Jarak antar tombol */
+    margin-top: 10px; /* Jarak antara tombol dan diagram */
+    padding: 10px;
+    flex-wrap: wrap; /* Agar tombol tetap rapi di layar kecil */
+}
+
+/* Tombol Zoom dan Download */
+#zoom-controls button, #download-btn {
+    padding: 8px 15px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    font-size: 14px;
+}
+
+#zoom-controls button:hover, #download-btn:hover {
+    background-color: #0056b3;
+}
+
+/* Icon Table Container */
+#icon-table-container {
+    flex: 1; /* Lebar lebih kecil untuk Icon List */
+    text-align: center;
+    border-left: 1px solid #ddd;
+    padding-left: 20px;
+}
+
+/* Icon List */
+#icon-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    max-height: 500px;
+    overflow-y: auto; /* Scroll untuk ikon jika terlalu banyak */
+    padding: 10px;
+    border: 1px solid #ddd; /* Border untuk membedakan area */
+}
+
+/* SVG Responsif */
+svg {
+    width: 100%;
+    height: auto;
+    /*min-width: 1000px;*/
+    min-height: 1000px;
+    /*max-width: none;*/
+    /*max-height: none;*/
+    position: relative;
+    cursor: grab;
+    pointer-events: all;
+}
+
+/* Styling untuk Form di Modal */
+#filterForm {
+    display: flex;
+    flex-direction: column; /* Susun elemen ke bawah */
+    align-items: center; /* Tengahkan elemen */
+    gap: 15px;
+    padding: 10px;
+}
+
+/* Form Group: Menyamakan Lebar Input */
+#filterForm .form-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+
+/* Input Fields */
+#filterForm input {
+    padding: 10px;
+    font-size: 14px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    text-align: center;
+    width: 80%; /* Menyesuaikan ukuran input */
+}
+
+/* Tombol Form */
+#filterForm .form-actions {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    width: 100%;
+}
+
+/* Styling Tombol Apply & Reset */
+#filterForm .form-actions button {
+    padding: 10px 20px;
+    font-size: 14px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    width: 150px; /* Pastikan tombol memiliki ukuran yang seragam */
+}
+
+/* Warna hover */
+#filterForm .form-actions button:hover {
+    background-color: #007bff;
+}
+
+/* Tombol Reset */
+#filterForm .form-actions button:nth-child(2) {
+    background-color: #dc3545;
+}
+
+#filterForm .form-actions button:nth-child(2):hover {
+    background-color: #c82333;
+}
+
+#filterForm button:hover {
+    background-color: #0056b3;
+}
+
+/* Style untuk Modal */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    justify-content: center;
+    align-items: center;
+}
+
+/* Konten Modal */
+.modal-content {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    width: 50%;
+    text-align: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Tombol Close */
+.close {
+    float: right;
+    font-size: 24px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close:hover {
+    color: red;
+}
+
+/* Tooltip Container */
+.tooltip {
+    position: absolute;
+    background-color: rgba(0, 0, 0, 0.75);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 12px;
+    display: none;
+    pointer-events: none; /* Agar tidak mengganggu interaksi */
+    z-index: 1000; /* Pastikan muncul di atas elemen lain */
+}
+
+@media (max-width: 768px) {
+    .remarks {
+        display: none !important; /* Pastikan text remarks disembunyikan */
+    }
+
+    .remarks-icon {
+        display: block !important; /* Pastikan icon muncul */
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+}
+
+/*@media (min-width: 769px) {*/
+/*    .remarks-icon {*/
+/*        display: none !important; !* Sembunyikan icon di desktop *!*/
+/*    }*/
+/*}*/
+
+
+
+.remarks {
+    pointer-events: all !important;
+    cursor: pointer;
+}
+
+
+

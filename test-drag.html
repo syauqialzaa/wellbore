@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Wellbore Diagram - Dynamic Input</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; }
+        form { margin: 10px auto; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
+        input, select, button { margin: 5px; padding: 5px; text-align: center; }
+        #diagram-container {
+            flex: 2; /* Lebar lebih besar untuk diagram */
+            text-align: center;
+        }
+
+        #icon-table-container {
+            flex: 1; /* Lebar lebih kecil untuk tabel */
+            text-align: center;
+            border-left: 1px solid #ddd;
+            padding-left: 20px;
+        }
+
+        #icon-list {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .icon-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .icon-item img {
+            width: 50px; /* Ukuran ikon default */
+            height: 50px;
+            cursor: grab;
+            /*border-radius: 50%;*/
+            transition: transform 0.3s ease;
+        }
+
+        .icon-item img:hover {
+            transform: scale(1.5); /* Efek zoom saat di-hover */
+        }
+
+        svg { border: 1px solid #ccc; display: block; margin: 20px auto; }
+    </style>
+</head>
+<body>
+<h2>Wellbore Diagram - Dynamic Input</h2>
+
+<div style="display: flex; justify-content: space-between; align-items: flex-start;">
+    <!-- Wellbore Diagram -->
+    <div id="diagram-container">
+        <h3>Wellbore Diagram</h3>
+        <svg id="wellbore" width="450" height="800"></svg>
+    </div>
+
+    <!-- Icon List -->
+    <div id="icon-table-container">
+        <h3>Icon List</h3>
+        <div id="icon-list"></div>
+    </div>
+</div>
+
+<script>
+    let data = [
+        { ICON_NAME: 'SurfCsg', TOP_MD: 19, BOT_MD: 624, OD_INCH: 13.37 },
+        { ICON_NAME: 'IntermCsg', TOP_MD: 19, BOT_MD: 3602, OD_INCH: 9.625 },
+        { ICON_NAME: 'ProdCsg', TOP_MD: 19, BOT_MD: 5745, OD_INCH: 7 },
+        { ICON_NAME: 'Tubing', TOP_MD: 19, BOT_MD: 4795, OD_INCH: 3.5 },
+        { ICON_NAME: 'ESPump', TOP_MD: 4795, BOT_MD: 4802, OD_INCH: 5 },
+        { ICON_NAME: 'PKR', TOP_MD: 4827, BOT_MD: 4958, OD_INCH: 4.5 }
+    ];
+
+    const iconNames = [
+        { name: "SurfCsg", src: "img/SurfCsg.png" },
+        { name: "IntermCsg", src: "img/IntermCsg.png" },
+        { name: "ProdCsg", src: "img/ProdCsg.png" },
+        { name: "Tubing", src: "img/Tubing.png" },
+        { name: "ESPump", src: "img/ESPump.png" },
+        { name: "PKR", src: "img/PKR.png" }
+    ];
+
+    const width = 450, height = 800;
+    const svg = document.getElementById("wellbore");
+
+    const renderDiagram = () => {
+        svg.innerHTML = '';
+        const maxDepth = Math.max(...data.map(d => d.BOT_MD));
+        const yScale = depth => (depth / maxDepth) * height;
+        const maxOD = Math.max(...data.map(d => d.OD_INCH));
+        const widthScale = od => (od / maxOD) * 150;
+
+        // Render skala
+        for (let i = 0; i <= maxDepth; i += 500) {
+            const yPos = yScale(i);
+            const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            line.setAttribute("x1", 30);
+            line.setAttribute("x2", 50);
+            line.setAttribute("y1", yPos);
+            line.setAttribute("y2", yPos);
+            line.setAttribute("stroke", "black");
+            svg.appendChild(line);
+
+            const label = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            label.setAttribute("x", 10);
+            label.setAttribute("y", yPos + 5);
+            label.textContent = i;
+            svg.appendChild(label);
+        }
+
+        data.forEach(component => {
+            const img = document.createElementNS("http://www.w3.org/2000/svg", "image");
+            const imgWidth = widthScale(component.OD_INCH);
+            const imgHeight = yScale(component.BOT_MD - component.TOP_MD);
+            const xPos = (width / 2) - (imgWidth / 2);
+            const yPos = yScale(component.TOP_MD);
+
+            img.setAttributeNS("http://www.w3.org/1999/xlink", "href", `img/${component.ICON_NAME}.png`);
+            img.setAttribute("x", xPos);
+            img.setAttribute("y", yPos);
+            img.setAttribute("width", imgWidth);
+            img.setAttribute("height", imgHeight);
+            img.setAttribute("preserveAspectRatio", "none");
+            svg.appendChild(img);
+        });
+    };
+
+    const populateIconList = () => {
+        const container = document.getElementById("icon-list");
+        container.innerHTML = '';
+        iconNames.forEach(icon => {
+            const iconItem = document.createElement("div");
+            iconItem.className = "icon-item";
+
+            const img = document.createElement("img");
+            img.src = icon.src;
+            img.alt = icon.name;
+            img.draggable = true;
+            img.addEventListener("dragstart", (e) => {
+                e.dataTransfer.setData("text/plain", icon.name);
+            });
+
+            const label = document.createElement("span");
+            label.textContent = icon.name;
+
+            iconItem.appendChild(img);
+            iconItem.appendChild(label);
+            container.appendChild(iconItem);
+        });
+    };
+
+    const enableDropOnDiagram = () => {
+        svg.addEventListener("dragover", (e) => e.preventDefault());
+        svg.addEventListener("drop", (e) => {
+            e.preventDefault();
+            const iconName = e.dataTransfer.getData("text/plain");
+            const yPos = e.offsetY;
+            const maxDepth = Math.max(...data.map(d => d.BOT_MD));
+            const newDepth = (yPos / height) * maxDepth;
+
+            const component = { ICON_NAME: iconName, TOP_MD: Math.round(newDepth), BOT_MD: Math.round(newDepth + 500), OD_INCH: 5 };
+            data.push(component);
+            renderDiagram();
+        });
+    };
+
+    renderDiagram();
+    populateIconList();
+    enableDropOnDiagram();
+</script>
+</body>
+</html>

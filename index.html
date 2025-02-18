@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Tambahkan meta viewport -->
+    <title>Wellbore Diagram - Dynamic Input</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvg/dist/browser/canvg.min.js"></script>
+</head>
+<body>
+<h2>Wellbore Diagram - Dynamic Input</h2>
+
+<!-- Tambahkan 3 Tombol untuk Membuka Modal -->
+<div style="display: flex; justify-content: center; gap: 15px; margin-bottom: 20px;">
+    <button onclick="openModal('editModal')">Edit</button>
+    <button onclick="openModal('filterModal')">Filter</button>
+    <button onclick="openModal('iconModal')">Icon List</button>
+</div>
+
+<!-- Edit Existing Data -->
+<div id="editModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal('editModal')">&times;</span>
+        <h4>Edit Component</h4>
+        <form id="editForm">
+            <div class="form-group">
+                <label for="editIconName">ICON_NAME:</label>
+                <select id="editIconName" onchange="fillEditForm()">
+                    <option value="">Select Component</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="editTopMd">TOP_MD:</label>
+                <input type="number" id="editTopMd" placeholder="TOP_MD">
+            </div>
+            <div class="form-group">
+                <label for="editBotMd">BOT_MD:</label>
+                <input type="number" id="editBotMd" placeholder="BOT_MD">
+            </div>
+            <div class="form-group">
+                <label for="editOdInch">OD_INCH:</label>
+                <input type="number" step="0.1" id="editOdInch" placeholder="OD_INCH">
+            </div>
+            <div class="form-actions">
+                <button type="button" onclick="editComponent()">Regenerate</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal untuk Filter Wellbore Diagram -->
+<div id="filterModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal('filterModal')">&times;</span>
+        <h4>Filter Wellbore Data</h4>
+        <form id="filterForm">
+            <div class="form-group">
+                <label for="filterTopMd">TOP_MD:</label>
+                <input type="number" id="filterTopMd" placeholder="Enter TOP_MD">
+            </div>
+            <div class="form-group">
+                <label for="filterBotMd">BOT_MD:</label>
+                <input type="number" id="filterBotMd" placeholder="Enter BOT_MD">
+            </div>
+            <div class="form-actions">
+                <button type="button" onclick="applyFilter()">Apply Filter</button>
+                <button type="button" onclick="resetFilter()">Reset</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+
+<div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap;"> <!-- Flex Container -->
+    <!-- Diagram Container -->
+    <div id="diagram-container" style="flex: 2; min-width: 300px;"> <!-- Diagram container -->
+        <div id="zoom-controls" style="margin-top: 10px; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;">
+<!--            <button onclick="zoomIn()">Zoom In</button>-->
+<!--            <button onclick="zoomOut()">Zoom Out</button>-->
+<!--            <button onclick="resetZoom()">Reset</button>-->
+            <button onclick="toggleFullScreen()">View Fullscreen</button>
+            <button id="download-btn">Download as Image</button>
+        </div>
+        <svg id="wellbore" style="width: 100%; height: auto; max-width: 768px;"></svg>
+        <!-- Zoom Controls -->
+
+    </div>
+
+<!--    &lt;!&ndash; Icon Table &ndash;&gt;-->
+<!--    <div id="icon-table-container" style="flex: 1; min-width: 300px; margin-left: 20px;"> &lt;!&ndash; Icon List &ndash;&gt;-->
+<!--        <h3>Icon List</h3>-->
+<!--        <div id="icon-list"></div>-->
+<!--    </div>-->
+</div>
+
+<!-- Modal untuk Icon List -->
+<div id="iconModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal('iconModal')">&times;</span>
+        <h3>Icon List</h3>
+        <div id="icon-list"></div>
+    </div>
+</div>
+
+<script src="js/app.js" defer></script>
+</body>
+</html>
