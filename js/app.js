@@ -21,7 +21,6 @@ function showTooltip(event, text) {
 }
 
 
-
 // Fungsi untuk menyembunyikan tooltip
 function hideTooltip() {
     tooltip.style.display = "none";
@@ -99,8 +98,6 @@ window.onclick = function(event) {
 
 
 
-
-
 let scale = 1;
 
 function zoomIn() {
@@ -130,8 +127,6 @@ function toggleFullScreen() {
         document.exitFullscreen();
     }
 }
-
-
 
 
 
