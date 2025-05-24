@@ -35,8 +35,8 @@ class WellboreComponent(db.Model):
 @app.route('/api/wellbore-data1', methods=['GET'])
 def get_wellbore_data1():
 #     components = WellboreComponent.query.all()  # Pastikan Anda menggunakan all()
-#     components = WellboreComponent.query.filter_by(uwi='PEB000026D1').all()
-    components = WellboreComponent.query.filter_by(uwi='DURI01141V1').all()  # Pastikan Anda menggunakan all()
+    components = WellboreComponent.query.filter_by(uwi='PEB000026D1').all()
+    # components = WellboreComponent.query.filter_by(uwi='DURI01141V1').all()  # Pastikan Anda menggunakan all()
 #     print(f"Components fetched from database: {components}")  # Log untuk debug
     for component in components:
             print(component)  # Cetak setiap objek yang diambil
@@ -57,7 +57,7 @@ def get_wellbore_data1():
 @app.route('/api/wellbore-data', methods=['GET'])
 def get_wellbore_data():
     try:
-        uwi = request.args.get('uwi', 'DURI01141V1')  # Default UWI jika tidak diberikan
+        uwi = request.args.get('uwi', 'PEB000026D1')  # Default UWI jika tidak diberikan
         top_md = request.args.get('top_md', type=int)
         bot_md = request.args.get('bot_md', type=int)
 
