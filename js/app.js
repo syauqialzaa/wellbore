@@ -236,6 +236,9 @@ const renderDiagram = () => {
     data.sort((a, b) => a.BOT_MD - b.BOT_MD); // Urutkan berdasarkan BOT_MD
 
     // Pisahkan Tubing dan TbgPump agar dirender terakhir
+    const perforationOpenComponents = data.filter(d => d.ICON_NAME === "PerfoOpen");
+    const perforationCloseComponents = data.filter(d => d.ICON_NAME === "PerfoCls");
+    const perforationSqzComponents = data.filter(d => d.ICON_NAME === "PerfoSqz");
     const tbgPumpComponents = data.filter(d => d.ICON_NAME === "TbgPump");
     const tubingComponents = data.filter(d => d.ICON_NAME === "Tubing");
     const otherComponents = data.filter(d => d.ICON_NAME !== "TbgPump" && d.ICON_NAME !== "Tubing");
@@ -244,9 +247,12 @@ const renderDiagram = () => {
     // Urutkan berdasarkan BOT_MD untuk memastikan urutan dari atas ke bawah
     otherComponents.sort((a, b) => a.BOT_MD - b.BOT_MD);
     tubingComponents.sort((a, b) => a.BOT_MD - b.BOT_MD);
+    perforationOpenComponents.sort((a, b) => a.BOT_MD - b.BOT_MD);
+    perforationCloseComponents.sort((a, b) => a.BOT_MD - b.BOT_MD);
+    perforationSqzComponents.sort((a, b) => a.BOT_MD - b.BOT_MD);
 
     // Gabungkan kembali dengan Tubing dan TbgPump di akhir, sehingga mereka dirender terakhir
-    const sortedComponents = [...otherComponents, ...tubingComponents, ...tbgPumpComponents];
+    const sortedComponents = [...otherComponents, ...tubingComponents, ...tbgPumpComponents, ...perforationOpenComponents, ...perforationCloseComponents, ...perforationSqzComponents];
 
     sortedComponents.forEach((component, index) => {
         if (component.TOP_MD >= component.BOT_MD) {

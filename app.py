@@ -39,7 +39,7 @@ def get_wellbore_data1():
     # components = WellboreComponent.query.filter_by(uwi='DURI01141V1').all()  # Pastikan Anda menggunakan all()
 #     print(f"Components fetched from database: {components}")  # Log untuk debug
     for component in components:
-            print(component)  # Cetak setiap objek yang diambil
+            print("komponent", component)  # Cetak setiap objek yang diambil
 
     result = [
         {
