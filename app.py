@@ -2,13 +2,27 @@ from flask import Flask, jsonify, request, send_from_directory
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 import os
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 app = Flask(__name__)
 CORS(app)
 CORS(app, resources={r"/img/*": {"origins": "*"}})
 
-# Connection Database
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:Mysql123.@localhost/wellbore_db'
+# PostgreSQL Database Configuration
+DATABASE_URL = os.getenv('DATABASE_URL')
+if not DATABASE_URL:
+    # Fallback to individual environment variables
+    DB_HOST = os.getenv('PG_HOST')
+    DB_PORT = os.getenv('PG_PORT')
+    DB_NAME = os.getenv('PG_DATABASE')
+    DB_USER = os.getenv('PG_USER')
+    DB_PASSWORD = os.getenv('PG_PASSWORD')
+    DATABASE_URL = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+
+app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
@@ -34,25 +48,26 @@ class WellboreComponent(db.Model):
 
 @app.route('/api/wellbore-data1', methods=['GET'])
 def get_wellbore_data1():
-#     components = WellboreComponent.query.all()  # Pastikan Anda menggunakan all()
-    components = WellboreComponent.query.filter_by(uwi='PEB000026D1').all()
-    # components = WellboreComponent.query.filter_by(uwi='DURI01141V1').all()  # Pastikan Anda menggunakan all()
-#     print(f"Components fetched from database: {components}")  # Log untuk debug
-    for component in components:
+    try:
+        components = WellboreComponent.query.filter_by(uwi='PEB000026D1').all()
+        
+        for component in components:
             print("komponent", component)  # Cetak setiap objek yang diambil
 
-    result = [
-        {
-            "ICON_NAME": component.icon_name,
-            "TOP_MD": component.top_md,
-            "BOT_MD": component.bot_md,
-            "OD_INCH": component.od_inch,
-            'REMARKS':component.remark
-        }
-        for component in components
-    ]
-    return jsonify(result)
-
+        result = [
+            {
+                "ICON_NAME": component.icon_name,
+                "TOP_MD": component.top_md,
+                "BOT_MD": component.bot_md,
+                "OD_INCH": component.od_inch,
+                'REMARKS': component.remark
+            }
+            for component in components
+        ]
+        return jsonify(result)
+    except Exception as e:
+        print("ERROR in /api/wellbore-data1:", str(e))
+        return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
 
 @app.route('/api/wellbore-data', methods=['GET'])
 def get_wellbore_data():
@@ -67,8 +82,6 @@ def get_wellbore_data():
 
         if top_md is not None and bot_md is not None:
             query = query.filter(WellboreComponent.bot_md >= top_md, WellboreComponent.top_md <= bot_md)
-#               query = query.filter(WellboreComponent.bot_md == top_md, WellboreComponent.top_md == bot_md)
-#             query = query.filter(WellboreComponent.top_md == top_md, WellboreComponent.bot_md == top_md)
 
         print(f"Generated Query: {query}")  # Debugging query
 
@@ -95,8 +108,6 @@ def get_wellbore_data():
         print("ERROR in /api/wellbore-data:", str(e))  # Log ke terminal
         return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
 
-
-
 # API untuk mendapatkan daftar file gambar di folder 'img'
 @app.route('/api/icons', methods=['GET'])
 def get_icons():
@@ -111,6 +122,11 @@ def get_icons():
 def serve_image(filename):
     return send_from_directory(IMG_FOLDER, filename)
 
+# Health check endpoint
+@app.route('/health', methods=['GET'])
+def health_check():
+    return jsonify({"status": "healthy", "message": "Wellbore API is running"}), 200
+
 # Menjalankan server
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    app.run(debug=True, host='0.0.0.0', port=8181)
