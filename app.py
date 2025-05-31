@@ -46,8 +46,64 @@ class WellboreComponent(db.Model):
     seq = db.Column(db.Integer)
     remark = db.Column(db.String(255))
 
+@app.route('/api/wellbore-data', methods=['GET'])
+def get_wellbore_data():
+    try:
+        # Get URL parameters - enhanced to accept more parameters
+        uwi = request.args.get('uwi', 'PEB000026D1')  # Default UWI
+        top_md = request.args.get('top_md', type=int)
+        bot_md = request.args.get('bot_md', type=int)
+        icon_name = request.args.get('icon_name', type=str)  # New parameter for icon filtering
+        
+        print(f"Fetching wellbore data for UWI: {uwi}, TOP_MD: {top_md}, BOT_MD: {bot_md}, ICON: {icon_name}")
+
+        # Start building query
+        query = WellboreComponent.query.filter_by(uwi=uwi)
+
+        # Apply depth filters
+        if top_md is not None and bot_md is not None:
+            query = query.filter(
+                WellboreComponent.bot_md >= top_md, 
+                WellboreComponent.top_md <= bot_md
+            )
+        elif top_md is not None:
+            query = query.filter(WellboreComponent.top_md >= top_md)
+        elif bot_md is not None:
+            query = query.filter(WellboreComponent.bot_md <= bot_md)
+
+        # Apply icon name filter if provided
+        if icon_name:
+            query = query.filter(WellboreComponent.icon_name.ilike(f'%{icon_name}%'))
+
+        print(f"Generated Query: {query}")  # Debugging query
+
+        components = query.all()
+
+        if not components:
+            print("No components found")  # Debugging
+            return jsonify([]), 200  # Return empty array instead of 404
+
+        # Keep the original response format
+        result = [
+            {
+                "ICON_NAME": component.icon_name,
+                "TOP_MD": component.top_md,
+                "BOT_MD": component.bot_md,
+                "OD_INCH": component.od_inch,
+                "REMARKS": component.remark
+            }
+            for component in components
+        ]
+
+        return jsonify(result), 200
+
+    except Exception as e:
+        print("ERROR in /api/wellbore-data:", str(e))  # Log ke terminal
+        return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
+
 @app.route('/api/wellbore-data1', methods=['GET'])
 def get_wellbore_data1():
+    """Legacy endpoint - keeping as is"""
     try:
         components = WellboreComponent.query.filter_by(uwi='PEB000026D1').all()
         
@@ -69,51 +125,20 @@ def get_wellbore_data1():
         print("ERROR in /api/wellbore-data1:", str(e))
         return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
 
-@app.route('/api/wellbore-data', methods=['GET'])
-def get_wellbore_data():
-    try:
-        uwi = request.args.get('uwi', 'PEB000026D1')  # Default UWI jika tidak diberikan
-        top_md = request.args.get('top_md', type=int)
-        bot_md = request.args.get('bot_md', type=int)
-
-        print(f"Fetching wellbore data for UWI: {uwi}, TOP_MD: {top_md}, BOT_MD: {bot_md}")
-
-        query = WellboreComponent.query.filter_by(uwi=uwi)
-
-        if top_md is not None and bot_md is not None:
-            query = query.filter(WellboreComponent.bot_md >= top_md, WellboreComponent.top_md <= bot_md)
-
-        print(f"Generated Query: {query}")  # Debugging query
-
-        components = query.all()
-
-        if not components:
-            print("No components found")  # Debugging
-            return jsonify({"message": "No components found"}), 404
-
-        result = [
-            {
-                "ICON_NAME": component.icon_name,
-                "TOP_MD": component.top_md,
-                "BOT_MD": component.bot_md,
-                "OD_INCH": component.od_inch,
-                "REMARKS": component.remark
-            }
-            for component in components
-        ]
-
-        return jsonify(result), 200
-
-    except Exception as e:
-        print("ERROR in /api/wellbore-data:", str(e))  # Log ke terminal
-        return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
-
 # API untuk mendapatkan daftar file gambar di folder 'img'
 @app.route('/api/icons', methods=['GET'])
 def get_icons():
     try:
+        # Optional search parameter for filtering icons
+        search = request.args.get('search', type=str)
+        
         files = [f for f in os.listdir(IMG_FOLDER) if f.lower().endswith(('.png', '.jpg', '.jpeg', '.gif', '.svg'))]
-        return jsonify(files)  # Mengembalikan daftar file sebagai JSON
+        
+        # Apply search filter if provided
+        if search:
+            files = [f for f in files if search.lower() in f.lower()]
+        
+        return jsonify(files)  # Keep original response format - just array of filenames
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
