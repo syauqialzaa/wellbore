@@ -163,7 +163,7 @@ def health_check():
 
 @app.route('/api/screenshot', methods=['POST'])
 def generate_screenshot():
-    """Generate screenshot of wellbore diagram - Enhanced version with proper UWI handling"""
+    """Generate screenshot of wellbore diagram - ENHANCED with proper depth filtering"""
     try:
         print("📸 Screenshot endpoint called")
         
@@ -172,13 +172,13 @@ def generate_screenshot():
         uwi = data.get('uwi', 'PEB000026D1')
         width = data.get('width', 2000)  # Increased for better quality
         height = data.get('height', 1800)  # Increased for complete diagram
-        top_md = data.get('top_md')  # Optional depth filter
-        bot_md = data.get('bot_md')  # Optional depth filter
+        top_md = data.get('top_md')  # CRITICAL: Depth filter parameter
+        bot_md = data.get('bot_md')  # CRITICAL: Depth filter parameter
         icon_name = data.get('icon_name')  # Optional component filter
         
         print(f"📸 Screenshot request for UWI: {uwi}, Size: {width}x{height}")
-        if top_md or bot_md:
-            print(f"📏 Depth filter: {top_md} - {bot_md} ft")
+        if top_md is not None or bot_md is not None:
+            print(f"📏 DEPTH FILTER DETECTED: {top_md} - {bot_md} ft")
         if icon_name:
             print(f"🔧 Component filter: {icon_name}")
         
@@ -189,20 +189,23 @@ def generate_screenshot():
                 "error": "UWI parameter is required"
             }), 400
         
-        # Build URL with proper parameters
+        # Build URL with ENHANCED parameter handling for depth filtering
         base_url = "https://syauqialzaa.github.io/wellbore/"
         params = [f"uwi={uwi}", "auto_load=true"]
         
-        # Add optional filters only if specified
+        # CRITICAL FIX: Add depth filters only if specified
         if top_md is not None:
             params.append(f"top_md={top_md}")
+            print(f"🎯 Adding top_md parameter: {top_md} ft")
         if bot_md is not None:
             params.append(f"bot_md={bot_md}")
+            print(f"🎯 Adding bot_md parameter: {bot_md} ft")
         if icon_name:
             params.append(f"icon_name={icon_name}")
+            print(f"🎯 Adding icon_name parameter: {icon_name}")
         
         url = f"{base_url}?" + "&".join(params)
-        print(f"🔗 Target URL: {url}")
+        print(f"🔗 TARGET URL WITH DEPTH FILTERS: {url}")
         
         # Enhanced Chrome options for larger viewport
         chrome_options = Options()
@@ -238,8 +241,8 @@ def generate_screenshot():
             driver.set_window_size(width, height)
             print(f"📏 Viewport set to {width}x{height}")
             
-            # Navigate to the wellbore diagram
-            print(f"🌐 Navigating to URL for UWI {uwi}...")
+            # Navigate to the wellbore diagram with DEPTH PARAMETERS
+            print(f"🌐 Navigating to URL with depth filters for UWI {uwi}...")
             driver.get(url)
             
             # Wait for initial DOM to load
@@ -248,14 +251,16 @@ def generate_screenshot():
             wait.until(EC.presence_of_element_located((By.ID, "wellbore")))
             print("✅ Wellbore element found")
             
-            # Wait for data to load specifically for the UWI
-            print(f"📊 Waiting for {uwi} data to load...")
-            time.sleep(12)  # Extended wait for complete loading
+            # ENHANCED: Wait for data to load with depth filtering
+            print(f"📊 Waiting for {uwi} data to load with depth filters...")
+            time.sleep(15)  # Extended wait for complete loading with filters
             
-            # Hide UI elements and ensure complete data loading with safe null checking
-            print("🎭 Hiding UI elements and ensuring complete data loading...")
+            # Hide UI elements and ENSURE DEPTH FILTERS ARE APPLIED
+            print("🎭 Hiding UI elements and ensuring depth filters are applied...")
             script_result = driver.execute_script("""
                 try {
+                    console.log('🔧 Starting UI cleanup and depth filter verification...');
+                    
                     // Hide buttons and UI elements that might interfere
                     const elementsToHide = [
                         'button[onclick*="toggleFullScreen"]',
@@ -287,47 +292,74 @@ def generate_screenshot():
                     
                     console.log('Hidden ' + hiddenCount + ' UI elements');
                     
-                    // Force trigger data loading for the specific UWI
+                    // CRITICAL: Verify and apply depth filters from URL parameters
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const topMd = urlParams.get('top_md');
+                    const botMd = urlParams.get('bot_md');
+                    const iconName = urlParams.get('icon_name');
+                    const uwi = urlParams.get('uwi');
+                    
+                    console.log('🎯 URL Parameters detected:');
+                    console.log('  UWI:', uwi);
+                    console.log('  top_md:', topMd);
+                    console.log('  bot_md:', botMd);
+                    console.log('  icon_name:', iconName);
+                    
+                    // Apply depth filters if they exist in URL
+                    if (topMd || botMd) {
+                        console.log('📏 APPLYING DEPTH FILTERS from URL...');
+                        
+                        // Try to find and set filter inputs
+                        const topInput = document.querySelector('#filterTopMd, input[name="top_md"], .top-md-filter');
+                        const botInput = document.querySelector('#filterBotMd, input[name="bot_md"], .bot-md-filter');
+                        
+                        if (topInput && topMd) {
+                            topInput.value = topMd;
+                            console.log('✅ Set top_md filter to:', topMd);
+                            // Trigger change event
+                            topInput.dispatchEvent(new Event('change', { bubbles: true }));
+                        }
+                        
+                        if (botInput && botMd) {
+                            botInput.value = botMd;
+                            console.log('✅ Set bot_md filter to:', botMd);
+                            // Trigger change event
+                            botInput.dispatchEvent(new Event('change', { bubbles: true }));
+                        }
+                        
+                        // Force trigger filtering function
+                        if (typeof applyDepthFilter === 'function') {
+                            console.log('🔄 Calling applyDepthFilter function...');
+                            applyDepthFilter(topMd, botMd);
+                        } else if (typeof filterByDepth === 'function') {
+                            console.log('🔄 Calling filterByDepth function...');
+                            filterByDepth(topMd, botMd);
+                        } else if (typeof updateDiagram === 'function') {
+                            console.log('🔄 Calling updateDiagram function...');
+                            updateDiagram();
+                        }
+                    }
+                    
+                    // Apply icon filter if specified
+                    if (iconName) {
+                        console.log('🔧 APPLYING ICON FILTER:', iconName);
+                        const iconInput = document.querySelector('#filterIconName, input[name="icon_name"], .icon-filter');
+                        if (iconInput) {
+                            iconInput.value = iconName;
+                            iconInput.dispatchEvent(new Event('change', { bubbles: true }));
+                            console.log('✅ Set icon filter to:', iconName);
+                        }
+                    }
+                    
+                    // Force data reload with filters
                     if (typeof fetchWellboreData === 'function') {
-                        console.log('🔄 Triggering fetchWellboreData for UWI...');
+                        console.log('🔄 Forcing data reload with filters...');
                         try {
                             fetchWellboreData();
                         } catch (e) {
                             console.log('Error calling fetchWellboreData:', e);
                         }
-                    } else {
-                        console.log('⚠️ fetchWellboreData function not found');
                     }
-                    
-                    // Reset any applied filters to ensure proper UWI data loading
-                    if (typeof resetFilter === 'function') {
-                        console.log('🔄 Resetting filters to ensure UWI data loads properly...');
-                        try {
-                            resetFilter();
-                        } catch (e) {
-                            console.log('Error calling resetFilter:', e);
-                        }
-                    } else {
-                        console.log('⚠️ resetFilter function not found');
-                    }
-                    
-                    // Clear any input filters that might interfere - WITH NULL CHECKING
-                    const filterSelectors = ['#filterTopMd', '#filterBotMd', '#filterIconName'];
-                    filterSelectors.forEach(selector => {
-                        try {
-                            const input = document.querySelector(selector);
-                            if (input && input.value !== undefined) {
-                                input.value = '';
-                                console.log('Cleared filter input:', selector);
-                            } else if (input) {
-                                console.log('Input found but no value property:', selector);
-                            } else {
-                                console.log('Input not found:', selector);
-                            }
-                        } catch (e) {
-                            console.log('Error clearing filter input:', selector, e);
-                        }
-                    });
                     
                     // Check if UWI-specific data is loaded
                     const currentUWI = document.querySelector('#currentUWI, .current-uwi, [data-uwi]');
@@ -336,9 +368,14 @@ def generate_screenshot():
                     
                     return {
                         success: true, 
-                        message: 'UI elements hidden and UWI data loading ensured',
+                        message: 'UI elements hidden and depth filters applied',
                         uwi: uwiInfo,
-                        hiddenElements: hiddenCount
+                        hiddenElements: hiddenCount,
+                        appliedFilters: {
+                            top_md: topMd,
+                            bot_md: botMd,
+                            icon_name: iconName
+                        }
                     };
                     
                 } catch (error) {
@@ -349,11 +386,11 @@ def generate_screenshot():
             
             print(f"📋 Script execution result: {script_result}")
             
-            # Additional wait for complete rendering after script execution
-            print("⏳ Additional wait for complete rendering...")
-            time.sleep(8)
+            # Additional wait for complete rendering after depth filters
+            print("⏳ Additional wait for complete rendering after depth filtering...")
+            time.sleep(10)  # Extended wait for filter application
             
-            # Check data loading with better error handling
+            # Verify SVG content after filtering
             svg_check_result = driver.execute_script("""
                 try {
                     const svg = document.getElementById('wellbore');
@@ -367,11 +404,15 @@ def generate_screenshot():
                     const rects = svg.querySelectorAll('rect');
                     const paths = svg.querySelectorAll('path');
                     
-                    console.log(`📊 SVG content: ${images.length} images, ${texts.length} texts, ${lines.length} lines, ${rects.length} rects, ${paths.length} paths`);
+                    console.log(`📊 SVG content after filtering: ${images.length} images, ${texts.length} texts, ${lines.length} lines, ${rects.length} rects, ${paths.length} paths`);
                     
-                    // Check for UWI-specific content
+                    // Check for depth range in text content
                     const textContent = Array.from(texts).map(t => t.textContent).join(' ');
-                    const hasUWIContent = textContent.length > 0;
+                    const hasDepthInfo = textContent.length > 0;
+                    
+                    // Look for depth numbers that match our filter
+                    const depthNumbers = textContent.match(/\d{3,5}/g) || [];
+                    console.log('📏 Depth numbers found in SVG:', depthNumbers);
                     
                     return {
                         success: true,
@@ -381,15 +422,16 @@ def generate_screenshot():
                         rects: rects.length,
                         paths: paths.length,
                         svgContent: svg.innerHTML.length,
-                        hasContent: hasUWIContent,
-                        contentPreview: textContent.substring(0, 100)
+                        hasContent: hasDepthInfo,
+                        contentPreview: textContent.substring(0, 200),
+                        depthNumbers: depthNumbers
                     };
                 } catch (error) {
                     return {success: false, error: error.message};
                 }
             """)
             
-            print(f"📊 SVG check result: {svg_check_result}")
+            print(f"📊 SVG check result after filtering: {svg_check_result}")
             
             # Capture ONLY the wellbore SVG element (no UI elements)
             screenshot = None
@@ -397,27 +439,27 @@ def generate_screenshot():
             
             try:
                 # Method 1: Capture only the wellbore SVG element
-                print(f"📷 Attempting to capture wellbore SVG for {uwi}...")
+                print(f"📷 Attempting to capture filtered wellbore SVG for {uwi}...")
                 wellbore_svg = driver.find_element(By.ID, "wellbore")
                 screenshot = wellbore_svg.screenshot_as_png
-                screenshot_method = "wellbore-svg-only"
-                print(f"✅ Screenshot captured: wellbore SVG only for {uwi}")
+                screenshot_method = "wellbore-svg-filtered"
+                print(f"✅ Screenshot captured: wellbore SVG with depth filters for {uwi}")
             except Exception as e:
                 print(f"❌ Wellbore SVG screenshot failed for {uwi}: {e}")
                 try:
-                    # Method 2: Try diagram container without buttons
+                    # Method 2: Try diagram container
                     print(f"📷 Attempting to capture diagram container for {uwi}...")
                     diagram_container = driver.find_element(By.ID, "diagram-container")
                     screenshot = diagram_container.screenshot_as_png
-                    screenshot_method = "diagram-container"
-                    print(f"✅ Screenshot captured: diagram-container for {uwi}")
+                    screenshot_method = "diagram-container-filtered"
+                    print(f"✅ Screenshot captured: diagram-container with filters for {uwi}")
                 except Exception as e2:
                     print(f"❌ Diagram container screenshot failed for {uwi}: {e2}")
                     # Method 3: Full page as last resort
                     print(f"📷 Attempting full page screenshot for {uwi}...")
                     screenshot = driver.get_screenshot_as_png()
-                    screenshot_method = "full-page"
-                    print(f"✅ Screenshot captured: full-page for {uwi}")
+                    screenshot_method = "full-page-filtered"
+                    print(f"✅ Screenshot captured: full-page with filters for {uwi}")
             
             if not screenshot:
                 raise Exception(f"Failed to capture screenshot for {uwi} with any method")
@@ -441,7 +483,7 @@ def generate_screenshot():
                     "bot_md": bot_md,
                     "icon_name": icon_name
                 },
-                "notes": f"Wellbore diagram for {uwi}, SVG only, no UI elements"
+                "notes": f"Wellbore diagram for {uwi} with depth filtering applied: {top_md}-{bot_md} ft"
             }), 200
             
         finally:
